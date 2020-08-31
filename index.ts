@@ -39,6 +39,9 @@ const getProperty = async (elementHandle: puppeteer.ElementHandle, property: str
 
   //Go through all available dates
   const dateOptions = await page.$$("select option");
+
+  let content = `Sadly no free positions have been found.`;
+
   for (const dateOption of dateOptions) {
     const value = await getProperty(dateOption, "value");
     if (value !== "-1") {
@@ -49,13 +52,13 @@ const getProperty = async (elementHandle: puppeteer.ElementHandle, property: str
       if (date < config.currentDate) {
         const freeSpaces = parseInt(innerParts[3]);
         if (freeSpaces > 1) {
-          await axios.post(config.webhookUrl, {
-            content: `<@${config.mentionRole}>, there are ${freeSpaces} free spaces for the exam on ${date.toLocaleDateString()}`
-          });
+          content = `<@${config.mentionRole}>, there are ${freeSpaces} free spaces for the exam on ${date.toLocaleDateString()}`
         }
       }
     }
   }
+
+  await axios.post(config.webhookUrl, { content });
 
   // await page.screenshot({path: 'screenshot.png'});
   await browser.close();
